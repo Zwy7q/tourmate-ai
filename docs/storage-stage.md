@@ -10,7 +10,7 @@ mvn -s maven-central-settings.xml spring-boot:run '-Dspring-boot.run.profiles=po
 
 PostgreSQL 地址为 localhost:5433，Redis 地址为 localhost:6380。默认演示模式使用字符哈希向量进行联调，不具备真实模型的语义理解能力。
 
-如果已配置 DASHSCOPE_API_KEY，可将启动 profiles 改为 `postgres,redis,embedding`。真实接口必须返回 1536 维向量。切换模型或模式后需重新导入文档；不要混用不同模型的向量。
+推荐启用 `postgres,redis,embedding`，使用低成本 text-embedding-v4 生成 1536 维向量，需要 DASHSCOPE_API_KEY，见 [向量阶段说明](embedding-stage.md)。可选 `postgres,redis,local-embedding` 使用 Ollama 本地 1024 维模型，无需额外 Key。来源字段与独立维度列防止混用；切换模型后需重建或重新导入文档。
 
 ## 已实现
 
@@ -33,7 +33,7 @@ Remove-Item Env:TOURMATE_INTEGRATION
 
 ## 当前边界与后续任务
 
-- 真实 Embedding 请求需要 API Key，尚未进行线上调用。
+- 本地真实向量模型无需 API Key；远端向量服务为可选配置。
 - 得分融合为基础版本，尚未实现中文分词、RRF 与 Rerank。
 - 对话历史已保存；启用 deepseek profile 后，历史用于模型上下文与基础追问补全。
 - 默认仍为规则式回答；已通过 Spring AI 兼容接口接入 DeepSeek，详见 [DeepSeek 接入说明](deepseek-stage.md)。Spring AI Alibaba Agent 编排待后续实现。

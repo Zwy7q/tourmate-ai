@@ -12,7 +12,7 @@
 mvn -s maven-central-settings.xml spring-boot:run '-Dspring-boot.run.profiles=deepseek'
 ```
 
-需要 Redis 时，先启动 Docker 服务，再使用 profiles `deepseek,redis`。需要 PostgreSQL 时使用 `deepseek,postgres,redis`，并先导入政策文档。对话使用 DeepSeek，向量默认仍为演示向量；真实向量模型需要另外配置，不可混用不同模型生成的向量。
+需要 Redis 时，先启动 Docker 服务，再使用 profiles `deepseek,redis`。需要 PostgreSQL 时使用 `deepseek,postgres,redis`，并先导入政策文档。对话使用 DeepSeek，未启用向量 profile 时仍为演示向量；加上 `local-embedding` 即可使用无需额外 Key 的真实本地模型，详见 [本地向量检索说明](local-embedding-stage.md)。
 
 未启用 deepseek profile 时，使用离线规则回复，自动化测试不会使用真实密钥或产生模型费用。
 

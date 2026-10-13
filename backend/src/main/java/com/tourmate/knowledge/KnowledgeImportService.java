@@ -1,7 +1,6 @@
 package com.tourmate.knowledge;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +25,7 @@ public class KnowledgeImportService {
         if (text.isBlank()) {
             throw new IllegalArgumentException("文档内容不能为空");
         }
-        var chunks = List.of(text.split("\\n\\s*\\n"));
+        var chunks = new TextChunker().split(text);
         for (int index = 0; index < chunks.size(); index++) {
             repository.save(new KnowledgeDocument(
                     UUID.randomUUID().toString(),

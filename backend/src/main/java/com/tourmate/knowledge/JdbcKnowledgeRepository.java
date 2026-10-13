@@ -23,7 +23,9 @@ public class JdbcKnowledgeRepository implements KnowledgeRepository {
     public KnowledgeDocument save(KnowledgeDocument document) {
         var id = document.id() == null || document.id().isBlank() ? UUID.randomUUID().toString() : document.id();
         UUID.fromString(id);
-        var embedding = EmbeddingClient.literal(embeddings.embed(document.content()));
+        var chunks = new TextChunker().split(document.content());
+        if (chunks.isEmpty()) throw new IllegalArgumentException("文档内容不能为空");
+        var vectors = chunks.stream().map(content -> EmbeddingClient.literal(embeddings.embed(content))).toList();
         jdbc.update("""
                 INSERT INTO knowledge_documents(id, title, category, source_name, effective_date)
                 VALUES (?::uuid, ?, ?, ?, ?)
@@ -32,8 +34,11 @@ public class JdbcKnowledgeRepository implements KnowledgeRepository {
                 """, id, document.title(), document.category(), document.title(),
                 document.effectiveDate() == null ? null : Date.valueOf(document.effectiveDate()));
         jdbc.update("DELETE FROM knowledge_chunks WHERE document_id = ?::uuid", id);
-        jdbc.update("INSERT INTO knowledge_chunks(id, document_id, chunk_index, content, embedding) VALUES (?::uuid, ?::uuid, 0, ?, ?::vector)",
-                UUID.randomUUID(), id, document.content(), embedding);
+        for (int index = 0; index < chunks.size(); index++) {
+            jdbc.update("INSERT INTO knowledge_chunks(id, document_id, chunk_index, content, " + embeddings.vectorColumn()
+                            + ", embedding_identity) VALUES (?::uuid, ?::uuid, ?, ?, ?::vector, ?)",
+                    UUID.randomUUID(), id, index, chunks.get(index), vectors.get(index), embeddings.identity());
+        }
         return new KnowledgeDocument(id, document.title(), document.content(), document.category(), document.effectiveDate());
     }
 
@@ -41,17 +46,18 @@ public class JdbcKnowledgeRepository implements KnowledgeRepository {
     public List<KnowledgeSearchResult> search(String query, int limit) {
         if (query == null || query.isBlank()) return List.of();
         var vector = EmbeddingClient.literal(embeddings.embed(query));
+        var column = embeddings.vectorColumn();
         return jdbc.query("""
                 SELECT d.id, d.title, c.content, d.category, d.effective_date,
-                       (1 - (c.embedding <=> ?::vector)) +
+                       (1 - (c.%s <=> ?::vector)) +
                        ts_rank(c.search_text, plainto_tsquery('simple', ?)) AS score
                 FROM knowledge_chunks c JOIN knowledge_documents d ON d.id = c.document_id
-                WHERE c.embedding IS NOT NULL AND
-                    (1 - (c.embedding <=> ?::vector) > 0.1 OR c.search_text @@ plainto_tsquery('simple', ?))
+                WHERE c.embedding_identity = ? AND c.%s IS NOT NULL AND
+                    (1 - (c.%s <=> ?::vector) > 0.1 OR c.search_text @@ plainto_tsquery('simple', ?))
                 ORDER BY score DESC LIMIT ?
-                """, (rs, row) -> new KnowledgeSearchResult(
+                """.formatted(column, column, column), (rs, row) -> new KnowledgeSearchResult(
                         new KnowledgeDocument(rs.getString("id"), rs.getString("title"), rs.getString("content"),
                                 rs.getString("category"), rs.getDate("effective_date") == null ? null : rs.getDate("effective_date").toString()),
-                        rs.getDouble("score")), vector, query, vector, query, Math.min(Math.max(limit, 1), 20));
+                        rs.getDouble("score")), vector, query, embeddings.identity(), vector, query, Math.min(Math.max(limit, 1), 20));
     }
 }

@@ -52,4 +52,10 @@ public class KnowledgeController {
     public Map<String, String> badRequest(IllegalArgumentException exception) {
         return Map.of("error", exception.getMessage());
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public Map<String, String> unavailable(IllegalStateException exception) {
+        return Map.of("error", "知识处理服务暂时不可用，请检查向量模型服务后重试");
+    }
 }

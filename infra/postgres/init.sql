@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
     chunk_index INTEGER NOT NULL,
     content TEXT NOT NULL,
     embedding vector(1536),
+    embedding_local vector(1024),
+    embedding_identity TEXT,
     search_text TSVECTOR GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (document_id, chunk_index)

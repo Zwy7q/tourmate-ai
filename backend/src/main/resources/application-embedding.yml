@@ -2,5 +2,5 @@ tourmate:
   embedding:
     mode: remote
     url: ${TOURMATE_EMBEDDING_URL:https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings}
-    model: ${TOURMATE_EMBEDDING_MODEL:text-embedding-v3}
+    model: ${TOURMATE_EMBEDDING_MODEL:text-embedding-v4}
     api-key: ${DASHSCOPE_API_KEY:}

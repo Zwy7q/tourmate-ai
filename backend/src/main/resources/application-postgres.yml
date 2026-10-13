@@ -6,4 +6,5 @@ spring:
     password: ${TOURMATE_DB_PASSWORD:tourmate_dev}
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:db/embedding-metadata.sql
