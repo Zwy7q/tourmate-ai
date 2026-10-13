@@ -48,8 +48,8 @@ ChatHttpTest 验证多轮 HTTP 请求与 SSE 事件。
 
 ## 本阶段边界
 
-- 采用 Spring AI 的兼容接口调用 DeepSeek，尚未引入 Spring AI Alibaba Agent 编排。
+- 采用 Spring AI 的兼容接口调用 DeepSeek；额外启用 agent profile 后使用 Spring AI Alibaba ReAct Agent，见 [Agent 与 MCP 工具说明](mcp-agent-stage.md)。
 - 对话历史用于提示词和基础追问补全，尚未实现摘要或复杂意图重写。
 - 引用编号由提示词约束，尚未实现生成结果的引用校验。
-- 天气仍为明确标注的演示数据，MCP 与真实订单工具待后续接入。
+- 未启用 agent 时天气为演示数据；启用后通过 MCP 查询真实天气，订单工具只提供虚构演示订单。
 - 退款咨询不会触发确认流程；明确退款请求仅演示确认，不执行真实退款。

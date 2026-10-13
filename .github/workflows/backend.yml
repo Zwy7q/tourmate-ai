@@ -10,7 +10,12 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-          cache-dependency-path: backend/pom.xml
+          cache-dependency-path: |
+            backend/pom.xml
+            tools-server/pom.xml
       - name: 执行离线测试和打包
         working-directory: backend
         run: mvn -B -s maven-central-settings.xml clean verify
+      - name: 执行 MCP 工具服务测试和打包
+        working-directory: tools-server
+        run: mvn -B -s ../backend/maven-central-settings.xml clean verify

@@ -8,6 +8,12 @@
 
 **技术栈：** Java 21、Spring Boot、Maven、Spring Web、Bean Validation、JUnit 5、PostgreSQL/PGVector、Redis、Spring AI Alibaba、SSE、Vue 3、Docker。
 
+## 当前进度（2026-10-13）
+
+已完成后端基础、Tika 解析与分块、PGVector 本地真实向量检索与重建、Redis 会话、DeepSeek 流式对话、Spring AI Alibaba ReAct Agent、MCP 真实天气与演示订单查询、演示退款人工确认。见 [Agent 与 MCP 工具阶段](mcp-agent-stage.md)。
+
+未完成：行程规划、Vue 前端、Rerank、限流与统一评测。下文保留原设计顺序，不表示每个扩展项均已实现。简历为目标稿；正式投递时保留可以演示和解释的能力，不填写尚未测量的收益。
+
 ## 第一阶段：后端基础与健康检查
 
 文件：`tourmate-ai/backend/pom.xml`、`TourmateApplication.java`、`HealthController.java`。
@@ -54,7 +60,7 @@
 - 增加 `POST /api/chat/stream`。
 - 按 `meta`、`delta`、`done` 事件返回意图、答案片段和最终结果。
 - 编写中文 README，说明启动方式、接口示例和当前功能边界。
-- 编写中文简历项目描述，只记录已经真实完成的功能。
+- 编写中文简历项目目标稿，并明确实际进度；正式投递版本只保留已完成的功能。
 - 执行 `mvn test -q` 和 `mvn package -q -DskipTests`。
 
 ## 第六阶段：接入 PostgreSQL、PGVector 和 Spring AI Alibaba

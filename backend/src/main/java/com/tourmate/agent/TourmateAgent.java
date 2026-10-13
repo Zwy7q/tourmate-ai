@@ -13,13 +13,22 @@ public class TourmateAgent {
     private final KnowledgeRepository knowledgeRepository;
     private final WeatherTool weatherTool;
     private final RefundService refundService;
+    private final boolean agentEnabled;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public TourmateAgent(IntentRouter intentRouter, KnowledgeRepository knowledgeRepository,
-                         WeatherTool weatherTool, RefundService refundService) {
+                         WeatherTool weatherTool, RefundService refundService,
+                         @org.springframework.beans.factory.annotation.Value("${tourmate.agent.enabled:false}") boolean agentEnabled) {
         this.intentRouter = intentRouter;
         this.knowledgeRepository = knowledgeRepository;
         this.weatherTool = weatherTool;
         this.refundService = refundService;
+        this.agentEnabled = agentEnabled;
+    }
+
+    public TourmateAgent(IntentRouter intentRouter, KnowledgeRepository knowledgeRepository,
+                         WeatherTool weatherTool, RefundService refundService) {
+        this(intentRouter, knowledgeRepository, weatherTool, refundService, false);
     }
 
     public AgentResponse answer(String message) {
@@ -27,6 +36,9 @@ public class TourmateAgent {
         var citations = knowledgeRepository.search(message, 2);
         return switch (intent) {
             case WEATHER -> {
+                if (agentEnabled) {
+                    yield new AgentResponse(intent, "天气需要模型调用 get_weather 查询；未明确城市时先询问用户。", citations, false, null);
+                }
                 var weather = weatherTool.query("北京", "明天");
                 yield new AgentResponse(intent,
                         weather.city() + "" + weather.date() + "预计" + weather.condition() + "，气温约 "

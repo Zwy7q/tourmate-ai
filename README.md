@@ -15,6 +15,8 @@ TourMate AI 是一个面向景区和票务平台的智能客服系统。用户�
 
 当前 MVP 已内置景区开放时间、票价和退改规则示例知识，并提供确定性天气工具。不配置外部模型 API Key 也可以验证完整业务流程。
 
+启用 `deepseek,agent` 后使用 Spring AI Alibaba ReAct Agent，经独立 MCP 服务查询真实天气与虚构演示订单，不执行真实退款。完整启动步骤与 MCP 解释见 [Agent 与 MCP 工具说明](docs/mcp-agent-stage.md)。
+
 文档上传接口当前使用 Apache Tika 识别文件类型并提取文本，支持纯文本、Markdown 以及 Tika 已安装解析器支持的文档格式。
 
 在调用聊天接口时传入 `conversationId`，系统会保存用户消息和助手回答；默认采用内存窗口，启用 redis profile 后写入 Redis。启用 deepseek profile 后，历史用于模型上下文，并支持基础追问补全。
@@ -74,9 +76,8 @@ Invoke-RestMethod http://localhost:8080/api/refunds/confirm `
 
 ## 开发计划
 
-已完成文档解析、PostgreSQL / PGVector 存储、Redis 会话与 DeepSeek 对话生成。后续计划：
+已完成文档解析、PGVector 存储与本地 Qwen3 向量检索、Redis 会话、DeepSeek 对话、Spring AI Alibaba Agent 与 MCP 天气／演示订单工具。后续计划：
 
 1. 完善中文检索、重排序与问答评测。
-2. 使用 Spring AI Alibaba 编排 Agent，接入 MCP 天气、地图工具。
-3. 实现行程规划与工具执行确认。
-4. 增加限流、调用链日志和 Vue 3 前端。
+2. 实现行程规划，按需补充地图工具。
+3. 增加限流、调用链日志和 Vue 3 前端。

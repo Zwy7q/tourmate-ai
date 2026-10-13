@@ -1,5 +1,7 @@
 # 本地向量模型与知识检索
 
+本说明中的启动命令为普通 RAG 模式；启用 ReAct Agent 与真实 MCP 工具见 [Agent 与 MCP 工具阶段](mcp-agent-stage.md)。
+
 当前运行方案为 DeepSeek 对话与 Ollama 本地 Qwen3 向量检索，无需阿里云模型或第二份 API Key。本地向量推理没有云端接口费用，会消耗电脑的内存、CPU 和磁盘；DeepSeek 对话仍按其平台规则计费。
 
 ## 为什么只用 DeepSeek Key 也能运行

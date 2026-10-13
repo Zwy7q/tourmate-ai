@@ -11,6 +11,13 @@ import com.tourmate.tool.DeterministicWeatherTool;
 import org.junit.jupiter.api.Test;
 
 class TourmateAgentTest {
+    @Test void agentModeDoesNotCallDemoWeatherBeforeModelChoosesTools() {
+        com.tourmate.tool.WeatherTool forbiddenDemo = (city, date) -> { throw new AssertionError("Agent 不得提前查询演示天气"); };
+        var live = new TourmateAgent(new IntentRouter(), new InMemoryKnowledgeRepository(), forbiddenDemo, new RefundService(), true);
+        var answer = live.answer("杭州明天天气？");
+        assertThat(answer.intent()).isEqualTo(Intent.WEATHER);
+        assertThat(answer.answer()).contains("get_weather").doesNotContain("22°C", "北京");
+    }
     private final TourmateAgent agent = new TourmateAgent(new IntentRouter(), new InMemoryKnowledgeRepository(),
             new DeterministicWeatherTool(), new RefundService());
 
