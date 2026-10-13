@@ -4,7 +4,7 @@
 
 架构：保持 EmbeddingClient、KnowledgeRepository 的现有接口；新增 TextChunker 与 PostgreSQL 专用重建服务。增量 SQL 为旧表增加来源字段。
 
-技术：Java 21、Spring Boot、RestClient、JUnit、PGVector、DashScope text-embedding-v4；可选 Ollama qwen3-embedding:0.6b。
+技术：Java 21、Spring Boot、RestClient、JUnit、PGVector、Ollama qwen3-embedding:0.6b、DeepSeek。
 
 ## 任务 1：向量接口与分块
 
@@ -26,5 +26,5 @@
 
 - [x] 新增 local-embedding profile 和 Ollama Compose 服务，保留可选远端 v4 配置；补齐 .env.example 和中文配置说明。
 - [x] 运行 `mvn -s maven-central-settings.xml clean verify`，开启数据库集成模式，共 35 项测试通过。
-- [ ] 验证真实远端向量、知识检索与 DeepSeek 问答。已确认 Key 鉴权有效，但账户返回 Arrearage；待计费状态恢复后继续。
+- [x] 验证本地真实向量、知识检索与 DeepSeek 问答，不需要阿里云 Key 或恢复其计费状态：1024 维向量、旧文档重建、新政策检索、DeepSeek 带引用回答与 Redis 会话保存全部成功。
 - [ ] 检查暂存区不含本地密钥，提交并推送 origin main；确认远端提交与本地一致。

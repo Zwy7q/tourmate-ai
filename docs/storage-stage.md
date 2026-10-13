@@ -10,7 +10,7 @@ mvn -s maven-central-settings.xml spring-boot:run '-Dspring-boot.run.profiles=po
 
 PostgreSQL 地址为 localhost:5433，Redis 地址为 localhost:6380。默认演示模式使用字符哈希向量进行联调，不具备真实模型的语义理解能力。
 
-推荐启用 `postgres,redis,embedding`，使用低成本 text-embedding-v4 生成 1536 维向量，需要 DASHSCOPE_API_KEY，见 [向量阶段说明](embedding-stage.md)。可选 `postgres,redis,local-embedding` 使用 Ollama 本地 1024 维模型，无需额外 Key。来源字段与独立维度列防止混用；切换模型后需重建或重新导入文档。
+启用 `postgres,redis,local-embedding` 使用 Ollama 本地 Qwen3 1024 维模型，无需额外 Key，见 [本地向量说明](local-embedding-stage.md)。来源字段与独立维度列防止混用；切换模型后需重建或重新导入文档。当前运行方案不使用阿里云模型。
 
 ## 已实现
 

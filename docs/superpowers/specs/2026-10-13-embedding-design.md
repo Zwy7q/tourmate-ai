@@ -2,9 +2,9 @@
 
 ## 目标与方案
 
-DeepSeek 负责回答，推荐低成本 DashScope text-embedding-v4 生成 1536 维向量，PGVector 负责检索。支持无需额外 Key 的本地 Ollama qwen3-embedding:0.6b（原生 1024 维）作为可选方案。
+DeepSeek 负责回答，本地 Ollama qwen3-embedding:0.6b 生成原生 1024 维向量，PGVector 负责检索。用户已明确不使用阿里云模型，当前运行流程只需要 DeepSeek Key。
 
-数据库新增 embedding_local vector(1024)，保留原 embedding vector(1536) 和历史数据，避免改变维数导致原向量丢失。v4 官方支持 1536 维；本地模型可使用 CPU，但需首次下载。
+数据库新增 embedding_local vector(1024)，保留原 embedding vector(1536) 和历史数据，避免改变维数导致原向量丢失。本地模型可使用 CPU，但需首次下载，模型文件约 639 MB。
 
 ## 数据流与边界
 
@@ -21,5 +21,5 @@ DeepSeek 负责回答，推荐低成本 DashScope text-embedding-v4 生成 1536 
 - 本机 HTTP 服务验证向量请求与异常响应校验。
 - 分块测试覆盖长段落、段落边界、重叠及空文本。
 - Docker 集成测试覆盖来源隔离、重建、原文保留与多块存储。
-- 使用供应商向量接口完成真实向量、PGVector 与 DeepSeek 联调；账户不可用时明确记录验证限制。
+- 使用本地 Qwen3 完成真实向量、PGVector 与 DeepSeek 联调。
 - 中文说明与配置示例无真实密钥；验证后提交并推送。

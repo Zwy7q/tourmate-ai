@@ -23,7 +23,7 @@ TourMate AI 是一个面向景区和票务平台的智能客服系统。用户�
 
 已支持 DeepSeek 对话生成、本地 .env 配置加载与模型流式输出。启动命令及业务流程见 [DeepSeek 接入说明](docs/deepseek-stage.md)。
 
-真实向量检索推荐 DashScope text-embedding-v4，配置与低成本运行说明见 [向量检索阶段说明](docs/embedding-stage.md)。也支持无需额外 Key 的 [可选本地模型](docs/local-embedding-stage.md)。已支持长文分块、模型来源隔离与旧向量分批重建。
+真实向量检索使用 Ollama 本地 Qwen3 模型，对话继续使用 DeepSeek，只有 DeepSeek 需要 API Key，详见 [本地向量检索说明](docs/local-embedding-stage.md)。已支持长文分块、模型来源隔离与旧向量分批重建。
 
 环境要求：Java 21、Maven 3.9+。PGVector 和 Redis 联调需要 Docker Desktop 正常运行。
 
