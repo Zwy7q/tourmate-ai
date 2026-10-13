@@ -44,6 +44,11 @@ public class JdbcKnowledgeRepository implements KnowledgeRepository {
 
     @Override
     public List<KnowledgeSearchResult> search(String query, int limit) {
+        return searchByCategory(query, limit, null);
+    }
+
+    @Override
+    public List<KnowledgeSearchResult> searchByCategory(String query, int limit, String category) {
         if (query == null || query.isBlank()) return List.of();
         var vector = EmbeddingClient.literal(embeddings.embed(query));
         var column = embeddings.vectorColumn();
@@ -53,11 +58,12 @@ public class JdbcKnowledgeRepository implements KnowledgeRepository {
                        ts_rank(c.search_text, plainto_tsquery('simple', ?)) AS score
                 FROM knowledge_chunks c JOIN knowledge_documents d ON d.id = c.document_id
                 WHERE c.embedding_identity = ? AND c.%s IS NOT NULL AND
+                    (?::text IS NULL OR d.category = ?) AND
                     (1 - (c.%s <=> ?::vector) > 0.1 OR c.search_text @@ plainto_tsquery('simple', ?))
                 ORDER BY score DESC LIMIT ?
                 """.formatted(column, column, column), (rs, row) -> new KnowledgeSearchResult(
                         new KnowledgeDocument(rs.getString("id"), rs.getString("title"), rs.getString("content"),
                                 rs.getString("category"), rs.getDate("effective_date") == null ? null : rs.getDate("effective_date").toString()),
-                        rs.getDouble("score")), vector, query, embeddings.identity(), vector, query, Math.min(Math.max(limit, 1), 20));
+                        rs.getDouble("score")), vector, query, embeddings.identity(), category, category, vector, query, Math.min(Math.max(limit, 1), 20));
     }
 }

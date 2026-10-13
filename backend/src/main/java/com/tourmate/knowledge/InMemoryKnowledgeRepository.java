@@ -33,8 +33,14 @@ public class InMemoryKnowledgeRepository implements KnowledgeRepository {
 
     @Override
     public List<KnowledgeSearchResult> search(String query, int limit) {
+        return searchByCategory(query, limit, null);
+    }
+
+    @Override
+    public List<KnowledgeSearchResult> searchByCategory(String query, int limit, String category) {
         var terms = tokens(query);
         return documents.stream()
+                .filter(document -> category == null || category.equals(document.category()))
                 .map(document -> new KnowledgeSearchResult(document, score(document, terms)))
                 .filter(result -> result.score() > 0)
                 .sorted(Comparator.comparingDouble(KnowledgeSearchResult::score).reversed())

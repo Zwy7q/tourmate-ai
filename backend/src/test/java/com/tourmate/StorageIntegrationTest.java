@@ -22,11 +22,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({"postgres", "redis"})
 @EnabledIfEnvironmentVariable(named = "TOURMATE_INTEGRATION", matches = "true")
 class StorageIntegrationTest {
+    @Autowired com.tourmate.itinerary.ItineraryStore itineraries;
     @Autowired KnowledgeRepository knowledge;
     @Autowired ConversationStore conversations;
     @Autowired JdbcTemplate jdbc;
     @Autowired StringRedisTemplate redis;
     @Autowired KnowledgeReindexService reindex;
+
+    @Test void storesItineraryInRedisWithAtomicVersionAndExpiry() {
+        var id = UUID.randomUUID().toString();
+        try {
+            var requirements = new com.tourmate.itinerary.TripRequirements("杭州", java.time.LocalDate.parse("2026-10-14"), 2,
+                    new java.math.BigDecimal("1000"), "慢节奏", java.util.List.of(2));
+            var state = new com.tourmate.itinerary.TripState(1, requirements, null, "NEEDS_KNOWLEDGE", "导入资料", java.util.List.of());
+            assertThat(itineraries.save(id, 0, state)).isTrue();
+            assertThat(itineraries.save(id, 0, state)).isFalse();
+            assertThat(itineraries.find(id).orElseThrow()).isEqualTo(state);
+            assertThat(redis.getExpire("tourmate:itinerary:" + id)).isBetween(86300L, 86400L);
+            assertThat(itineraries.save(id, 1, new com.tourmate.itinerary.TripState(2, requirements, null, "NEEDS_KNOWLEDGE", "更新", java.util.List.of()))).isTrue();
+            assertThat(itineraries.find(id).orElseThrow().version()).isEqualTo(2);
+        } finally { redis.delete("tourmate:itinerary:" + id); }
+    }
 
     @Test void skipsConcurrentEditsInsteadOfStoringAStaleVector() throws Exception {
         var id = UUID.randomUUID().toString();
@@ -129,6 +145,8 @@ class StorageIntegrationTest {
         try {
             knowledge.save(new KnowledgeDocument(id, "测试海洋馆", "测试海洋馆潜水票提前两日退订", "refund-policy", "2026-10-13"));
             assertThat(knowledge.search("测试海洋馆潜水票", 10)).anyMatch(result -> result.document().id().equals(id));
+            assertThat(knowledge.searchByCategory("测试海洋馆潜水票", 10, "refund-policy")).anyMatch(result -> result.document().id().equals(id));
+            assertThat(knowledge.searchByCategory("测试海洋馆潜水票", 10, "itinerary-attraction")).noneMatch(result -> result.document().id().equals(id));
             assertThat(jdbc.queryForObject("SELECT vector_dims(embedding) FROM knowledge_chunks WHERE document_id = ?::uuid", Integer.class, id))
                     .isEqualTo(1536);
         } finally {
