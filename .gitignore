@@ -1,0 +1,16 @@
+# Maven
+backend/target/
+backend/.mvn/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local configuration and secrets
+*.local.yml
+.env
+.env.*
+
+# Docker data
+infra/**/data/
