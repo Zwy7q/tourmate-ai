@@ -34,6 +34,12 @@ public class TourmateAgent {
                         citations, false, null);
             }
             case REFUND_POLICY -> {
+                if (!(message.contains("我要退票") || message.contains("帮我退票") || message.contains("提交退款"))) {
+                    yield new AgentResponse(intent, citations.isEmpty()
+                            ? "未检索到适用的退改政策，无法确认是否可以退款。"
+                            : "退票需依据适用政策，咨询不会提交退款申请。" + citations.get(0).document().content(),
+                            citations, false, null);
+                }
                 RefundConfirmation confirmation = refundService.requestConfirmation();
                 yield new AgentResponse(intent,
                         "根据当前退改规则，未使用且未超过参观日的门票可以申请退票。若你要提交退款申请，请确认本次操作。",

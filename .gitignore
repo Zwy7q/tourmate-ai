@@ -11,6 +11,7 @@ backend/.mvn/
 *.local.yml
 .env
 .env.*
+!.env.example
 
 # Docker data
 infra/**/data/

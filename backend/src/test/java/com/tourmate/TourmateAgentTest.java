@@ -24,10 +24,18 @@ class TourmateAgentTest {
 
     @Test
     void asksForConfirmationBeforeRefund() {
-        var response = agent.answer("下雨了可以退票吗？");
+        var response = agent.answer("我要退票");
         assertThat(response.intent()).isEqualTo(Intent.REFUND_POLICY);
         assertThat(response.confirmationRequired()).isTrue();
         assertThat(response.confirmationToken()).isNotBlank();
+    }
+
+    @Test
+    void policyConsultationDoesNotCreateRefundAction() {
+        var response = agent.answer("下雨了可以退票吗？");
+        assertThat(response.intent()).isEqualTo(Intent.REFUND_POLICY);
+        assertThat(response.confirmationRequired()).isFalse();
+        assertThat(response.confirmationToken()).isNull();
     }
 
     @Test

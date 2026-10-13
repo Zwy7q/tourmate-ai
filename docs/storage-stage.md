@@ -35,8 +35,8 @@ Remove-Item Env:TOURMATE_INTEGRATION
 
 - 真实 Embedding 请求需要 API Key，尚未进行线上调用。
 - 得分融合为基础版本，尚未实现中文分词、RRF 与 Rerank。
-- 对话历史已保存，Agent 尚未读取历史做追问补全。
-- 回答仍为规则式生成，下一阶段接入 Spring AI Alibaba 对话模型。
+- 对话历史已保存；启用 deepseek profile 后，历史用于模型上下文与基础追问补全。
+- 默认仍为规则式回答；已通过 Spring AI 兼容接口接入 DeepSeek，详见 [DeepSeek 接入说明](deepseek-stage.md)。Spring AI Alibaba Agent 编排待后续实现。
 - PostgreSQL 模式启动后知识库为空，先通过文档上传或新增接口导入数据。
 - 退款与改签的订单规则、授权与幂等机制属于后续阶段。
 

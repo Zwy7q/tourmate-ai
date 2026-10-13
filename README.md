@@ -17,9 +17,11 @@ TourMate AI 是一个面向景区和票务平台的智能客服系统。用户�
 
 文档上传接口当前使用 Apache Tika 识别文件类型并提取文本，支持纯文本、Markdown 以及 Tika 已安装解析器支持的文档格式。
 
-在调用聊天接口时传入 `conversationId`，系统会保存用户消息和助手回答；默认采用内存窗口，启用 redis profile 后写入 Redis。历史目前仅用于保存与查询，尚未用于追问补全。
+在调用聊天接口时传入 `conversationId`，系统会保存用户消息和助手回答；默认采用内存窗口，启用 redis profile 后写入 Redis。启用 deepseek profile 后，历史用于模型上下文，并支持基础追问补全。
 
 ## 本地启动
+
+已支持 DeepSeek 对话生成、本地 .env 配置加载与模型流式输出。启动命令及业务流程见 [DeepSeek 接入说明](docs/deepseek-stage.md)。
 
 环境要求：Java 21、Maven 3.9+。PGVector 和 Redis 联调需要 Docker Desktop 正常运行。
 
@@ -59,7 +61,7 @@ mvn -s maven-central-settings.xml spring-boot:run '-Dspring-boot.run.profiles=po
 Invoke-RestMethod http://localhost:8080/api/chat -Method Post -ContentType 'application/json' -Body '{"message":"故宫几点开放？"}'
 ```
 
-退款问题会返回一次性确认令牌：
+明确提出“我要退票”等操作请求时会返回一次性确认令牌；普通退票政策咨询不会触发确认。以下接口仅模拟退款，不处理真实订单：
 
 ```powershell
 Invoke-RestMethod http://localhost:8080/api/refunds/confirm `
@@ -70,9 +72,9 @@ Invoke-RestMethod http://localhost:8080/api/refunds/confirm `
 
 ## 开发计划
 
-1. 将内存知识库替换为 PostgreSQL 和 PGVector。
-2. 使用 Apache Tika 支持 PDF、Word 和 Markdown 文档导入。
-3. 接入 Spring AI Alibaba 和真实大模型。
-4. 使用 MCP 接入天气、地图和景区实时状态工具。
-5. 增加 Redis 会话记忆、限流和调用链日志。
-6. 增加 Vue 3 前端和问答评测数据集。
+已完成文档解析、PostgreSQL / PGVector 存储、Redis 会话与 DeepSeek 对话生成。后续计划：
+
+1. 接入真实 Embedding 模型并完善中文检索与问答评测。
+2. 使用 Spring AI Alibaba 编排 Agent，接入 MCP 天气、地图工具。
+3. 实现行程规划与工具执行确认。
+4. 增加限流、调用链日志和 Vue 3 前端。

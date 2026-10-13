@@ -1,14 +1,16 @@
 package com.tourmate.api;
 
 import com.tourmate.agent.AgentResponse;
-import com.tourmate.agent.TourmateAgent;
+import com.tourmate.chat.ChatService;
 import com.tourmate.refund.RefundService;
-import com.tourmate.conversation.ConversationMessage;
-import com.tourmate.conversation.ConversationStore;
 import jakarta.validation.Valid;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
+import reactor.core.Disposable;
+import reactor.core.scheduler.Schedulers;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,50 +21,54 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api")
 public class ChatController {
-    private final TourmateAgent agent;
+    private final ChatService chatService;
     private final RefundService refundService;
-    private final ConversationStore conversationStore;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public ChatController(TourmateAgent agent, RefundService refundService, ConversationStore conversationStore) {
-        this.agent = agent;
+    public ChatController(ChatService chatService, RefundService refundService) {
+        this.chatService = chatService;
         this.refundService = refundService;
-        this.conversationStore = conversationStore;
     }
 
     @PostMapping("/chat")
     public AgentResponse chat(@Valid @RequestBody ChatRequest request) {
-        var response = agent.answer(request.message());
-        saveConversation(request, response);
-        return response;
+        return chatService.answer(request);
     }
 
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@Valid @RequestBody ChatRequest request) {
-        var emitter = new SseEmitter(30_000L);
-        executor.submit(() -> {
+        var emitter = new SseEmitter(120_000L);
+        var subscription = new AtomicReference<Disposable>();
+        var closed = new AtomicBoolean();
+        Runnable cancel = () -> {
+            closed.set(true);
+            var current = subscription.get();
+            if (current != null) current.dispose();
+        };
+        emitter.onTimeout(cancel);
+        emitter.onCompletion(cancel);
+        emitter.onError(error -> cancel.run());
+        var current = chatService.stream(request).subscribeOn(Schedulers.boundedElastic()).subscribe(event -> {
             try {
-                var response = agent.answer(request.message());
-                saveConversation(request, response);
-                emitter.send(SseEmitter.event().name("meta").data(Map.of("intent", response.intent())));
-                var answer = response.answer();
-                for (var part : answer.split("(?<=。)|(?<=！)|(?<=？)")) {
-                    if (!part.isBlank()) emitter.send(SseEmitter.event().name("delta").data(part));
-                }
-                emitter.send(SseEmitter.event().name("done").data(response));
-                emitter.complete();
-            } catch (Exception exception) {
-                emitter.completeWithError(exception);
+                emitter.send(SseEmitter.event().name(event.type()).data(event.data()));
+            } catch (java.io.IOException error) {
+                throw new IllegalStateException("客户端已断开", error);
             }
-        });
+        }, error -> {
+            try {
+                emitter.send(SseEmitter.event().name("error").data(Map.of("message", "生成服务暂时不可用，请稍后重试")));
+            } catch (Exception ignored) {
+                // 连接已经结束时无需再发送错误。
+            }
+            emitter.complete();
+        }, emitter::complete);
+        subscription.set(current);
+        if (closed.get()) current.dispose();
         return emitter;
     }
 
-    private void saveConversation(ChatRequest request, AgentResponse response) {
-        if (request.conversationId() != null && !request.conversationId().isBlank()) {
-            conversationStore.append(request.conversationId(), new ConversationMessage("user", request.message()));
-            conversationStore.append(request.conversationId(), new ConversationMessage("assistant", response.answer()));
-        }
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> unavailable(IllegalStateException exception) {
+        return ResponseEntity.status(502).body(Map.of("message", "生成服务暂时不可用，请稍后重试"));
     }
 
     @PostMapping("/refunds/confirm")
