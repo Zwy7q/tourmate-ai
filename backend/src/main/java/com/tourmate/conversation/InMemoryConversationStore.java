@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Profile("!redis")
 public class InMemoryConversationStore implements ConversationStore {
     private final Map<String, ArrayDeque<ConversationMessage>> conversations = new ConcurrentHashMap<>();
     private final int maxMessages;

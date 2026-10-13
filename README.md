@@ -17,7 +17,7 @@ TourMate AI 是一个面向景区和票务平台的智能客服系统。用户�
 
 文档上传接口当前使用 Apache Tika 识别文件类型并提取文本，支持纯文本、Markdown 以及 Tika 已安装解析器支持的文档格式。
 
-在调用聊天接口时传入 `conversationId`，系统会保存用户消息和助手回答；当前使用内存窗口保存，后续替换为 Redis。
+在调用聊天接口时传入 `conversationId`，系统会保存用户消息和助手回答；默认采用内存窗口，启用 redis profile 后写入 Redis。历史目前仅用于保存与查询，尚未用于追问补全。
 
 ## 本地启动
 
@@ -43,7 +43,15 @@ cd infra
 docker compose up -d
 ```
 
-PostgreSQL 映射到 `localhost:5433`，Redis 映射到 `localhost:6379`。数据库首次启动时会自动创建文档、向量、会话消息和全文检索表。
+PostgreSQL 映射到 `localhost:5433`，Redis 映射到 `localhost:6380`。数据库首次启动时会自动创建文档、向量、会话消息和全文检索表。
+
+启用 PostgreSQL 与 Redis 时，在 backend 目录执行：
+
+```powershell
+mvn -s maven-central-settings.xml spring-boot:run '-Dspring-boot.run.profiles=postgres,redis'
+```
+
+默认使用演示向量。真实模型模式、完整测试命令和当前实现边界见 [存储阶段说明](docs/storage-stage.md)。
 
 ## 接口示例
 

@@ -29,7 +29,7 @@ public class KnowledgeImportService {
         var chunks = List.of(text.split("\\n\\s*\\n"));
         for (int index = 0; index < chunks.size(); index++) {
             repository.save(new KnowledgeDocument(
-                    "upload-" + UUID.randomUUID(),
+                    UUID.randomUUID().toString(),
                     filename + "#" + (index + 1),
                     chunks.get(index).trim(),
                     category == null || category.isBlank() ? "general" : category,

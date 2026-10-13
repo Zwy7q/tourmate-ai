@@ -1,5 +1,5 @@
 spring:
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${TOURMATE_REDIS_HOST:localhost}
+      port: ${TOURMATE_REDIS_PORT:6380}

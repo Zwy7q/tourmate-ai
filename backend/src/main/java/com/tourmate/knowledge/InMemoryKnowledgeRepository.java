@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@org.springframework.context.annotation.Profile("!postgres")
 public class InMemoryKnowledgeRepository implements KnowledgeRepository {
     private final List<KnowledgeDocument> documents = new CopyOnWriteArrayList<>();
     private final AtomicInteger sequence = new AtomicInteger(3);

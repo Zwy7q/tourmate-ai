@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/tourmate
-    username: tourmate
-    password: tourmate_dev
+    driver-class-name: org.postgresql.Driver
+    url: ${TOURMATE_DB_URL:jdbc:postgresql://localhost:5433/tourmate}
+    username: ${TOURMATE_DB_USERNAME:tourmate}
+    password: ${TOURMATE_DB_PASSWORD:tourmate_dev}
   sql:
     init:
       mode: never
