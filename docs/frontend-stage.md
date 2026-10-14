@@ -12,9 +12,9 @@
 
 ## 启动
 
-要求 Node.js 22.12+（推荐22或24）。先按照 [Agent 与 MCP 启动说明](mcp-agent-stage.md) 启动后端；完整模式使用 DeepSeek 对话、Ollama 本地向量、PostgreSQL 与 Redis，不使用阿里云模型。
+要求 Node.js 22.12+（推荐22或24）。先按照 [Agent 与 MCP 启动说明](mcp-agent-stage.md) 启动工具服务；当前选择 DeepSeek 对话、百炼低价向量、PostgreSQL 与 Redis，后端启动命令见 [百炼向量配置](embedding-stage.md)。也可使用 Ollama 本地向量方案。
 
-注意：Ollama 是可选 Compose profile，启动完整基础设施应执行：
+使用百炼向量时，在infra目录执行 `docker compose up -d` 即可，无需下载Ollama模型。只有选择本地向量方案时，才需要：
 
 ```powershell
 cd infra

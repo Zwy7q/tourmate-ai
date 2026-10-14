@@ -11,6 +11,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EmbeddingClientTest {
+    @Test void cheapBailianFlashUsesRemote1024VectorsAndSeparateIdentity() throws Exception {
+        var request = new AtomicReference<String>();
+        var authorization = new AtomicReference<String>();
+        var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/embeddings", exchange -> {
+            request.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            authorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
+            var bytes = ("{\"data\":[{\"embedding\":[1" + ",0".repeat(1023) + "]}]}").getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+        server.start();
+        try {
+            var endpoint = "http://127.0.0.1:" + server.getAddress().getPort() + "/embeddings";
+            var client = new EmbeddingClient(endpoint, "test-key", "qwen3.7-text-embedding-flash", "remote");
+            assertThat(client.embed("学生票")).hasSize(1024);
+            assertThat(authorization.get()).isEqualTo("Bearer test-key");
+            var json = new ObjectMapper().readTree(request.get());
+            assertThat(json.path("dimensions").asInt()).isEqualTo(1024);
+            assertThat(json.path("encoding_format").asText()).isEqualTo("float");
+            assertThat(json.path("model").asText()).isEqualTo("qwen3.7-text-embedding-flash");
+            assertThat(client.vectorColumn()).isEqualTo("embedding_local");
+            assertThat(client.identity()).startsWith("remote:qwen3.7-text-embedding-flash:1024:")
+                    .isNotEqualTo(new EmbeddingClient(endpoint, "", "qwen3-embedding:0.6b", "ollama").identity());
+        } finally { server.stop(0); }
+    }
+
     @Test void callsLocalOllamaWithoutAnApiKey() throws Exception {
         var request = new AtomicReference<String>();
         var authorization = new AtomicReference<String>();

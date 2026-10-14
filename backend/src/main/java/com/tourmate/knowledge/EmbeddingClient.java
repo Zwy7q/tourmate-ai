@@ -48,7 +48,7 @@ public class EmbeddingClient {
             if (!local) request.header("Authorization", "Bearer " + apiKey);
             response = request.body(local
                     ? Map.of("model", model, "input", text, "keep_alive", "5m")
-                    : Map.of("model", model, "input", text, "dimensions", 1536, "encoding_format", "float"))
+                    : Map.of("model", model, "input", text, "dimensions", dimensions(), "encoding_format", "float"))
                     .retrieve().body(JsonNode.class);
         } catch (RestClientException exception) {
             // 不携带上游响应或异常原因，防止供应商错误正文泄漏配置。
@@ -83,10 +83,13 @@ public class EmbeddingClient {
         }
     }
 
-    public int dimensions() { return "ollama".equals(mode) ? 1024 : 1536; }
+    public int dimensions() {
+        return "ollama".equals(mode)
+                || ("remote".equals(mode) && "qwen3.7-text-embedding-flash".equals(model)) ? 1024 : 1536;
+    }
 
     /** 返回受控列名，不接收用户输入，不使用动态配置拼接 SQL 标识符。 */
-    public String vectorColumn() { return "ollama".equals(mode) ? "embedding_local" : "embedding"; }
+    public String vectorColumn() { return dimensions() == 1024 ? "embedding_local" : "embedding"; }
 
     private double[] demoVector(String text) {
         var vector = new double[1536];

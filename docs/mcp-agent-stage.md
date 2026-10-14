@@ -4,7 +4,7 @@
 
 用户问“杭州明天天气怎么样，适合去西湖吗？”，系统查询真实天气，再由 DeepSeek 组织回答。追问“那后天呢？”会沿用会话城市并查询新日期。还可以查询虚构订单 DEMO-1001，或根据上传的票务资料咨询价格、证件和退改政策。
 
-已接入 Spring AI Alibaba ReAct Agent 与独立 Java MCP 工具服务。对话仍使用 DeepSeek，向量仍使用 Ollama 本地 Qwen3。使用 Alibaba 开源框架不要求调用阿里云模型，不需要 DashScope Key。
+已接入 Spring AI Alibaba ReAct Agent 与独立 Java MCP 工具服务。对话仍使用 DeepSeek，向量可选百炼或Ollama本地Qwen3。当前用户选择百炼低价向量，完整后端命令见 [百炼向量配置](embedding-stage.md)；下文保留本地向量启动方式。使用 Alibaba 开源框架本身不要求调用阿里云模型；选择百炼向量才需要 DashScope Key。
 
 ## MCP 是什么
 
