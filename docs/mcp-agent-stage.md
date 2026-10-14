@@ -50,7 +50,7 @@ Agent 模式按模型轮次暂存文本，确认该轮没有工具调用后才�
 
 ```powershell
 cd infra
-docker compose up -d
+docker compose --profile local-embedding up -d
 docker compose exec ollama ollama pull qwen3-embedding:0.6b
 ```
 

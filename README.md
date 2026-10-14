@@ -4,6 +4,8 @@ TourMate AI 是一个面向景区和票务平台的智能客服系统。用户�
 
 ## 当前版本功能
 
+已提供 Vue 3 中文工作台：智能客服、行程助手、知识库上传与检索，支持手机布局。启动与演示步骤见 [前端使用说明](docs/frontend-stage.md)。
+
 - `GET /api/health`：服务健康检查
 - `POST /api/chat`：同步问答，返回意图、答案、知识引用和确认信息
 - `POST /api/chat/stream`：通过 SSE 流式返回答案
@@ -80,8 +82,8 @@ Invoke-RestMethod http://localhost:8080/api/refunds/confirm `
 
 ## 开发计划
 
-已完成文档解析、PGVector 存储与本地 Qwen3 向量检索、Redis 会话、DeepSeek 对话、Spring AI Alibaba Agent 与 MCP 天气／演示订单工具。后续计划：
+已完成文档解析、PGVector 存储与本地 Qwen3 向量检索、Redis 会话、DeepSeek 对话、Spring AI Alibaba Agent 与 MCP 天气／演示订单工具、结构化行程工作流和 Vue 3 中文工作台。后续计划：
 
 1. 完善中文检索、重排序与问答评测。
-2. 完善行程规划，按需补充地图工具。
-3. 增加限流、调用链日志和 Vue 3 前端。
+2. 增加限流与调用链日志，完善部署与演示脚本。
+3. 按需扩展地图工具和更完整的行程预算能力。
